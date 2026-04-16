@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KanjiForge - AI-Powered Kanji Quiz Generator</title>
+    <!-- ... rest of CSS same as before ... -->
+</head>
+<body>
+    <div class="container">
+        <h1>⚔️ KanjiForge</h1>
+        <p>Paste your kanji data below. AI will generate JLPT-style questions automatically.</p>
+        
+        <textarea id="kanjiInput" rows="10" placeholder="Example format:
+駐車 - park
+駐車場 - parking lot
+駐 - 15 strokes, チュウ
+
+無休 - no holiday
+無理 - unreasonable
+無 - 12 strokes, ム"></textarea>
+        
+        <button onclick="generateQuiz()">✨ Generate Questions with AI</button>
+        
+        <div id="loading" class="loading">🤖 AI is crafting questions... (30-60 seconds)</div>
+        <div id="quizArea"></div>
+    </div>
+
+    <script>
+        let currentQuestions = [];
+        
+        async function generateQuiz() {
+            const kanjiData = document.getElementById('kanjiInput').value;
+            if (!kanjiData.trim()) {
+                alert('Please enter kanji data first!');
+                return;
+            }
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('quizArea').innerHTML = '';
+            
+            try {
+                const formData = new FormData();
+                formData.append('kanji_data', kanjiData);
+                
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.questions) {
+                    currentQuestions = data.questions;
+                    displayQuestions(data.questions);
+                } else {
+                    alert('Failed to generate: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        function displayQuestions(questions) {
+            let html = '<h2>📚 Questions:</h2>';
+            
+            questions.forEach((q, idx) => {
+                html += `
+                    <div class="question" id="q${idx}">
+                        <strong>Question ${idx + 1}:</strong> ${q.text}<br>
+                        <div class="options">
+                            ${q.options.map(opt => `
+                                <label>
+                                    <input type="radio" name="q${idx}" value="${opt.charAt(0)}" onchange="saveAnswer(${idx}, '${opt.charAt(0)}')">
+                                    ${opt}
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `<button class="submit-btn" onclick="submitQuiz()">📊 Submit & View Score</button>`;
+            document.getElementById('quizArea').innerHTML = html;
+            
+            // Reset answers storage
+            window.userAnswers = {};
+        }
+        
+        function saveAnswer(questionId, answer) {
+            if (!window.userAnswers) window.userAnswers = {};
+            window.userAnswers[questionId] = answer;
+        }
+        
+        async function submitQuiz() {
+            if (!currentQuestions.length) return;
+            
+            const submission = {
+                answers: window.userAnswers || {},
+                questions: currentQuestions
+            };
+            
+            const response = await fetch('/api/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(submission)
+            });
+            
+            const result = await response.json();
+            
+            // Display results
+            let html = `<div class="result">
+                <h2>🎯 Quiz Results</h2>
+                <p style="font-size: 24px;"><strong>Score: ${result.score}/${result.total} (${result.percentage.toFixed(1)}%)</strong></p>
+            </div>`;
+            
+            result.questions.forEach((q, idx) => {
+                const userAns = result.userAnswers[idx] || '(not answered)';
+                const isCorrect = userAns === q.correct;
+                
+                html += `
+                    <div class="question">
+                        <strong>Question ${idx + 1}:</strong> ${q.text}<br>
+                        <div>Your answer: <span class="${isCorrect ? 'correct' : 'wrong'}">${userAns}</span></div>
+                        <div>Correct answer: <strong>${q.correct}</strong></div>
+                        <div class="explanation">
+                            <strong>💡 Explanation:</strong> ${q.explanation}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('quizArea').innerHTML = html;
+        }
+    </script>
+</body>
+</html>

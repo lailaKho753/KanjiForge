@@ -1,0 +1,577 @@
+# ⚔️ KanjiForge
+
+[![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go)](https://go.dev/)
+[![Ollama](https://img.shields.io/badge/Ollama-0.1+-green?style=flat&logo=ollama)](https://ollama.com)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+**Forge kanji mastery with AI-crafted JLPT-style quizzes. 100% local, privacy-focused, and completely free.**
+
+KanjiForge is a web application that uses local LLMs (via Ollama) to automatically generate Japanese JLPT-style multiple-choice questions from your kanji vocabulary data. No cloud API costs, no data leaving your machine.
+
+---
+
+## 📋 Table of Contents
+
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation Guide](#installation-guide)
+  - [Step 1: Install Go](#step-1-install-go)
+  - [Step 2: Install Ollama](#step-2-install-ollama)
+  - [Step 3: Download AI Model](#step-3-download-ai-model)
+  - [Step 4: Clone KanjiForge](#step-4-clone-kanjiforge)
+- [Running the Application](#running-the-application)
+- [Using KanjiForge](#using-kanjiforge)
+  - [Step 1: Prepare Your Kanji Data](#step-1-prepare-your-kanji-data)
+  - [Step 2: Generate Questions](#step-2-generate-questions)
+  - [Step 3: Take the Quiz](#step-3-take-the-quiz)
+  - [Step 4: Submit & Learn](#step-4-submit--learn)
+- [Example Walkthrough](#example-walkthrough)
+- [API Endpoints](#api-endpoints)
+- [Configuration](#configuration)
+- [Troubleshooting](#troubleshooting)
+- [System Requirements](#system-requirements)
+- [Project Structure](#project-structure)
+- [License](#license)
+
+---
+
+## ✨ Features
+
+- 🤖 **AI-Powered Generation** - Uses local LLMs to create questions
+- 📝 **JLPT-Style Questions** - Reading, usage, and meaning differentiation
+- 🎯 **Instant Scoring** - Immediate results with detailed explanations
+- 🔒 **100% Local** - Everything runs on your machine
+- ⚡ **Lightning Fast** - Built with Go for excellent performance
+- 🎨 **Clean Interface** - Simple, distraction-free UI
+
+---
+
+## 📋 Prerequisites
+
+Before you begin, ensure you have:
+
+| Requirement | Minimum | Recommended |
+|-------------|---------|-------------|
+| **Operating System** | macOS, Linux, Windows | macOS (Apple Silicon) |
+| **RAM** | 4GB | 8GB+ |
+| **Storage** | 10GB free | 20GB+ |
+| **Internet** | Only for initial download | Not needed after setup |
+
+---
+
+## 🚀 Installation Guide
+
+### Step 1: Install Go
+
+#### macOS
+```bash
+# Using Homebrew (recommended)
+brew install go
+
+# Or download from official site
+# https://go.dev/dl/
+Linux (Ubuntu/Debian)
+bash
+sudo apt update
+sudo apt install golang-go
+Windows
+Download installer from: https://go.dev/dl/
+
+Verify installation:
+
+bash
+go version
+# Should output: go version go1.21.x or higher
+Step 2: Install Ollama
+macOS
+bash
+# Using curl (recommended)
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Or download the .dmg from https://ollama.com/download
+Linux
+bash
+curl -fsSL https://ollama.com/install.sh | sh
+Windows
+Download installer from: https://ollama.com/download
+
+Verify Ollama is running:
+
+bash
+# Check if Ollama service is active
+ollama --version
+
+# Test API endpoint
+curl http://localhost:11434/api/tags
+Note: On first install, Ollama automatically starts as a background service. You don't need to manually run ollama serve unless you want to see logs.
+
+Step 3: Download AI Model
+Choose one model based on your RAM:
+
+Model	Size	RAM Needed	Speed	Quality	Command
+llama3.2:3b	2.0 GB	4-6 GB	⚡ Fast	Good	ollama pull llama3.2:3b
+phi3:mini	2.5 GB	5-7 GB	⚡ Fast	Good	ollama pull phi3:mini
+gemma2:9b	4.0 GB	6-8 GB	🐢 Slower	Better	ollama pull gemma2:9b
+mistral:7b	4.0 GB	6-8 GB	🐢 Slower	Better	ollama pull mistral:7b
+For Mac with 8GB RAM (like yours), use:
+
+bash
+ollama pull llama3.2:3b
+Download progress:
+
+bash
+# You'll see output like:
+# pulling manifest... 
+# pulling a80c4f17acd5... 100% ▕████████████████████▏ 2.0 GB
+# verifying sha256 digest... 
+# success
+Verify model is downloaded:
+
+bash
+ollama list
+# Should show:
+# NAME           ID              SIZE      MODIFIED
+# llama3.2:3b    a80c4f17acd5    2.0 GB    About a minute ago
+Step 4: Clone KanjiForge
+bash
+# Clone the repository
+git clone https://github.com/yourusername/KanjiForge.git
+cd KanjiForge
+
+# Download Go dependencies
+go mod download
+
+# Or if go.mod doesn't exist yet:
+go mod init github.com/yourusername/KanjiForge
+go get github.com/gin-gonic/gin
+go get github.com/go-resty/resty/v2
+🏃 Running the Application
+Start the Server
+bash
+# From the KanjiForge directory
+go run main.go
+Expected output:
+
+text
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+[GIN-debug] Loading HTML files from templates/*
+[GIN-debug] GET    /                         --> main.main.func1 (3 handlers)
+[GIN-debug] POST   /api/generate             --> handlers.GenerateQuestions (3 handlers)
+[GIN-debug] POST   /api/submit               --> handlers.SubmitQuiz (3 handlers)
+[GIN-debug] Listening and serving HTTP on :8080
+Open Your Browser
+Navigate to: http://localhost:8080
+
+You should see the KanjiForge interface.
+
+📖 Using KanjiForge
+Step 1: Prepare Your Kanji Data
+You need to provide kanji data in a text format. Any format works - the AI is smart enough to understand!
+
+Example Data Format 1: Simple
+text
+駐車 - park
+駐車場 - parking lot
+駐 - 15 strokes, チュウ
+Example Data Format 2: Detailed (like your original data)
+text
+駐車
+park 停车 주차
+駐車場ちゅうしゃじょう
+a parking lot 停车场 주차장
+ちゅうしゃ
+駐
+15画 チュウ
+Example Data Format 3: Minimal
+text
+駐 (park, チュウ)
+無休 (no holiday)
+満車 (full parking)
+Pro tip: The more data you provide, the better questions the AI will generate!
+
+Step 2: Generate Questions
+Paste your kanji data into the textarea on the webpage
+
+Example paste:
+
+text
+駐車 - park
+駐車場 - parking lot
+駐 - 15 strokes, チュウ
+
+無休 - no holiday
+無理 - unreasonable
+無 - 12 strokes, ム
+
+満車 - full (of cars)
+不満 - dissatisfied
+満 - 12 strokes, マン
+Click the "Generate Questions with AI" button
+
+Wait 30-60 seconds while the AI creates your questions
+
+You'll see a loading message:
+
+🤖 AI is crafting questions... (30-60 seconds)
+
+Questions appear automatically when generation is complete
+
+Step 3: Take the Quiz
+Once questions are generated, you'll see:
+
+text
+📚 Questions:
+
+Question 1: How to read kanji '駐' in the word '駐車'?
+○ A. ちゅう
+○ B. とまる
+○ C. つう
+○ D. しゃ
+
+Question 2: Which sentence uses '無理' correctly?
+○ A. 今日は無理をしないでください
+○ B. 駐車場は無理です
+○ C. 無理な方向に行きました
+○ D. 無理を満車しました
+Answer each question by clicking on your choice (A, B, C, or D).
+
+Your answers are automatically saved as you click.
+
+Step 4: Submit & Learn
+When you've answered all questions:
+
+Click the "Submit & View Score" button
+
+View your results:
+
+text
+🎯 Quiz Results
+Score: 3/4 (75.0%)
+
+Question 1: How to read kanji '駐' in '駐車'?
+Your answer: A | ✅ Correct answer: A
+💡 Explanation: In '駐車' (parking), kanji '駐' is read as 'ちゅう'...
+
+Question 2: Which sentence uses '無理' correctly?
+Your answer: B | ❌ Correct answer: A
+💡 Explanation: '無理' means unreasonable or impossible...
+Review the explanations to learn from your mistakes
+
+🎯 Example Walkthrough
+Let me show you a complete example from start to finish.
+
+Sample Input Data
+Copy and paste this into the textarea:
+
+text
+駐車 - parking
+駐車場 - parking lot
+駐 - 15 strokes, onyomi: チュウ
+
+無休 - no holiday, open all year
+無理 - unreasonable, impossible
+無 - 12 strokes, onyomi: ム, ブ
+
+満車 - full (of cars)
+不満 - dissatisfied
+満 - 12 strokes, onyomi: マン
+
+方向 - direction
+向かう - to head towards, to face
+向 - 6 strokes, onyomi: コウ, kunyomi: む-かう, む-く
+
+禁止 - prohibition
+禁 - 13 strokes, onyomi: キン
+
+関係 - relation, connection
+関心 - interest, concern
+関 - 14 strokes, onyomi: カン
+Expected AI Output (Example)
+The AI will generate 2 questions per kanji (10 total questions for 5 kanji):
+
+Sample questions you might get:
+
+text
+Question 1: What is the correct onyomi reading of '駐'?
+A. ちゅう
+B. とまる
+C. しゃ
+D. てい
+
+Question 2: Which word means "parking lot"?
+A. 駐車
+B. 駐車場
+C. 無休
+D. 満車
+
+Question 3: In the word '無理', what does '無' mean?
+A. Without/not
+B. Full
+C. Direction
+D. Prohibition
+
+Question 4: Which word means "dissatisfied"?
+A. 満車
+B. 無休
+C. 不満
+D. 無理
+After Submission
+You'll see your score and detailed explanations for each answer.
+
+🔌 API Endpoints
+If you want to use KanjiForge programmatically:
+
+POST /api/generate
+Generate questions from kanji data.
+
+Request (form-data):
+
+text
+kanji_data: 駐車 - park\n駐 - 15画 チュウ
+Response:
+
+json
+{
+  "questions": [
+    {
+      "id": 0,
+      "text": "How to read '駐' in '駐車'?",
+      "options": ["A. ちゅう", "B. とまる", "C. つう", "D. しゃ"],
+      "correct": "A",
+      "explanation": "In '駐車' (parking), '駐' is read as 'ちゅう'."
+    }
+  ],
+  "total": 1
+}
+POST /api/submit
+Submit answers and get score.
+
+Request:
+
+json
+{
+  "answers": {
+    "0": "A",
+    "1": "C"
+  },
+  "questions": [...]
+}
+Response:
+
+json
+{
+  "score": 1,
+  "total": 2,
+  "percentage": 50.0,
+  "questions": [...],
+  "userAnswers": {"0": "A", "1": "C"}
+}
+⚙️ Configuration
+Change AI Model
+Edit handlers/quiz.go, line ~45:
+
+go
+"model": "llama3.2:3b",  // Change to "gemma2:9b" or "mistral:7b"
+Change Port
+Edit main.go, last line:
+
+go
+r.Run(":8080")  // Change to ":3000" or any port
+Customize Question Style
+Edit the buildPrompt() function in handlers/quiz.go:
+
+go
+func buildPrompt(kanjiData string) string {
+    return fmt.Sprintf(`
+Create 3 multiple choice questions for EACH kanji...  // Change 2 to 3 for more questions
+Difficulty: N3 level  // Add difficulty level
+...
+`)
+}
+🐛 Troubleshooting
+Error: "Ollama: address already in use"
+Problem: Port 11434 is already occupied.
+
+Solution: This is normal! Ollama is already running in the background. Just use it:
+
+bash
+# Verify it's working
+ollama list
+curl http://localhost:11434/api/tags
+Error: "Failed to call AI"
+Problem: Cannot connect to Ollama.
+
+Solution: Start Ollama service:
+
+bash
+# On macOS/Linux
+ollama serve
+
+# On another terminal, verify it's running
+curl http://localhost:11434/api/tags
+Error: "Model not found"
+Problem: The model specified in code isn't downloaded.
+
+Solution: Download the model or change the model name:
+
+bash
+# List downloaded models
+ollama list
+
+# Download missing model
+ollama pull llama3.2:3b
+
+# Or change model in quiz.go to one you have
+Slow Question Generation (2+ minutes)
+Causes: Large model, low RAM, or other apps using resources.
+
+Solutions:
+
+bash
+# Use smaller model
+ollama pull llama3.2:3b  # Instead of gemma2:9b
+
+# Close other apps (Chrome, Docker, etc.)
+
+# Check memory pressure on Mac:
+# Open Activity Monitor → Memory tab
+AI Returns Gibberish or Empty Questions
+Problem: Model ran out of memory or prompt too long.
+
+Solutions:
+
+bash
+# Restart Ollama
+pkill ollama
+ollama serve
+
+# Reduce context window (edit quiz.go)
+"options": map[string]int{"num_ctx": 2048}  // Add this line
+Port 8080 Already in Use
+Solution: Change port in main.go:
+
+go
+r.Run(":8081")  // Use different port
+Then access: http://localhost:8081
+
+💻 System Requirements
+Minimum Configuration (Works, but slow)
+CPU: 2+ cores
+
+RAM: 4GB
+
+Storage: 10GB
+
+Model: llama3.2:3b
+
+Generation time: 1-2 minutes
+
+Recommended Configuration (Best experience)
+CPU: 4+ cores (Apple Silicon M1/M2/M3)
+
+RAM: 8GB+
+
+Storage: 20GB SSD
+
+Model: gemma2:9b or mistral:7b
+
+Generation time: 30-60 seconds
+
+Mac-Specific Notes
+Apple Silicon (M1/M2/M3): Excellent performance due to unified memory
+
+8GB RAM: Use llama3.2:3b - works perfectly
+
+16GB RAM: Can handle gemma2:9b comfortably
+
+Intel Mac: Still works, but will be slower
+
+📁 Project Structure
+text
+KanjiForge/
+├── main.go                 # Entry point, routes, server setup
+├── go.mod                  # Go module dependencies
+├── go.sum                  # Dependency checksums
+├── handlers/
+│   └── quiz.go            # AI integration, question generation, scoring
+├── models/
+│   └── question.go        # Data structures (Question, UserAnswer, etc.)
+├── templates/
+│   └── index.html         # Web interface (HTML, CSS, JavaScript)
+├── static/                 # Static assets (optional)
+│   └── style.css          # Custom CSS styles
+└── README.md              # This file
+🧪 Testing Your Setup
+Run these commands to verify everything works:
+
+bash
+# 1. Check Go installation
+go version
+
+# 2. Check Ollama
+ollama --version
+ollama list
+
+# 3. Test AI model
+ollama run llama3.2:3b "Say 'Hello, I am ready to make kanji quizzes!'"
+
+# 4. Test API
+curl http://localhost:11434/api/generate -d '{
+  "model": "llama3.2:3b",
+  "prompt": "Say OK",
+  "stream": false
+}'
+
+# 5. Run KanjiForge
+cd ~/path/to/KanjiForge
+go run main.go
+
+# 6. Test in browser
+open http://localhost:8080
+📝 Quick Reference Card
+bash
+# Start everything (after installation)
+ollama serve &                    # Start Ollama (usually auto-starts)
+go run main.go                    # Start KanjiForge
+
+# Commands you'll use most
+ollama list                       # See downloaded models
+ollama pull llama3.2:3b          # Download a model
+ollama run llama3.2:3b "prompt"  # Test model
+
+# Stop everything
+pkill ollama                      # Stop Ollama
+Ctrl+C                            # Stop Go server
+
+# Update KanjiForge
+git pull origin main
+go mod download
+🤝 Contributing
+Contributions welcome! Please:
+
+Fork the repository
+
+Create a feature branch
+
+Commit your changes
+
+Push to the branch
+
+Open a Pull Request
+
+📄 License
+Distributed under the MIT License. See LICENSE file for more information.
+
+🙏 Acknowledgments
+Ollama - Making local LLMs accessible
+
+Gin Framework - Lightweight Go web framework
+
+Meta - Llama models
+
+Google - Gemma models
+
+⭐ Show Your Support
+If KanjiForge helps you learn Japanese or inspires your project, please give it a star on GitHub!
+
+Happy learning, and may the kanji be with you! ⚔️🇯🇵
