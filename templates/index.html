@@ -3,26 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KanjiForge - AI-Powered Kanji Quiz Generator</title>
-    <!-- ... rest of CSS same as before ... -->
+    <title>KanjiForge - AI Kanji Quiz Generator</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: system-ui, 'Segoe UI', sans-serif; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: monospace; font-size: 14px; }
+        button { 
+            background: #0066cc; color: white; border: none; padding: 12px 24px; 
+            border-radius: 8px; cursor: pointer; font-size: 16px; margin-top: 10px;
+        }
+        button:hover { background: #0052a3; }
+        .question { 
+            background: #f9f9f9; padding: 20px; margin: 20px 0; 
+            border-radius: 12px; border-left: 4px solid #0066cc;
+        }
+        .options { margin: 15px 0; }
+        .options label { display: block; margin: 8px 0; cursor: pointer; padding: 8px; border-radius: 8px; }
+        .options label:hover { background: #f0f0f0; }
+        .submit-btn { background: #28a745; font-size: 18px; padding: 15px 30px; margin-top: 30px; }
+        .result { background: #e8f5e9; padding: 20px; border-radius: 12px; margin-top: 30px; }
+        .correct { color: #28a745; font-weight: bold; }
+        .wrong { color: #dc3545; }
+        .explanation { background: #fff3cd; padding: 12px; border-radius: 8px; margin-top: 10px; }
+        h1 { color: #333; }
+        
+        /* LOADING SPINNER */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            margin: 20px auto;
+            border: 5px solid #e0e0e0;
+            border-top: 5px solid #0066cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-box {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid #c62828;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>⚔️ KanjiForge</h1>
         <p>Paste your kanji data below. AI will generate JLPT-style questions automatically.</p>
         
-        <textarea id="kanjiInput" rows="10" placeholder="Example format:
-駐車 - park
-駐車場 - parking lot
-駐 - 15 strokes, チュウ
+        <textarea id="kanjiInput" rows="10" placeholder="Example:
+駐 (ちゅう) - onyomi: チュウ
+駐車 (ちゅうしゃ) - parking
+駐車場 (ちゅうしゃじょう) - parking lot
 
-無休 - no holiday
-無理 - unreasonable
-無 - 12 strokes, ム"></textarea>
+無 (む) - onyomi: ム, ブ
+無理 (むり) - impossible
+無料 (むりょう) - free
+無休 (むきゅう) - no holiday"></textarea>
         
         <button onclick="generateQuiz()">✨ Generate Questions with AI</button>
         
-        <div id="loading" class="loading">🤖 AI is crafting questions... (30-60 seconds)</div>
+        <div id="loading" class="loading">
+            <div style="font-size: 18px; font-weight: bold;">🤖 AI is generating questions...</div>
+            <div style="font-size: 14px; color: #666; margin-top: 10px;">This may take 30-60 seconds. Please don't close this page!</div>
+            <div class="spinner"></div>
+            <div style="font-size: 12px; color: #888; margin-top: 10px;">Calling Ollama with AI model...</div>
+        </div>
+        
         <div id="quizArea"></div>
     </div>
 
@@ -36,8 +109,14 @@
                 return;
             }
             
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('quizArea').innerHTML = '';
+            // Show loading
+            const loadingDiv = document.getElementById('loading');
+            const quizArea = document.getElementById('quizArea');
+            
+            loadingDiv.style.display = 'block';
+            quizArea.innerHTML = '';
+            
+            console.log('🚀 Generating quiz...');
             
             try {
                 const formData = new FormData();
@@ -48,18 +127,40 @@
                     body: formData
                 });
                 
-                const data = await response.json();
+                console.log('📡 Response status:', response.status);
                 
-                if (data.questions) {
+                const data = await response.json();
+                console.log('📦 Response data:', data);
+                
+                if (data.questions && data.questions.length > 0) {
                     currentQuestions = data.questions;
                     displayQuestions(data.questions);
                 } else {
-                    alert('Failed to generate: ' + (data.error || 'Unknown error'));
+                    quizArea.innerHTML = `
+                        <div class="error-box">
+                            <strong>❌ Failed to generate questions!</strong><br>
+                            ${data.error || 'No questions were generated'}<br><br>
+                            <strong>Check:</strong><br>
+                            1. Is Ollama running? <code>curl http://localhost:11434/api/tags</code><br>
+                            2. Is the model downloaded? <code>ollama list</code><br>
+                            3. Check terminal for error details
+                        </div>
+                    `;
                 }
             } catch (error) {
-                alert('Error: ' + error.message);
+                console.error('❌ Error:', error);
+                quizArea.innerHTML = `
+                    <div class="error-box">
+                        <strong>❌ Connection Error!</strong><br>
+                        ${error.message}<br><br>
+                        <strong>Make sure:</strong><br>
+                        1. Go server is running (<code>go run main.go</code>)<br>
+                        2. Ollama is active (<code>ollama serve</code>)<br>
+                        3. Check terminal for error logs
+                    </div>
+                `;
             } finally {
-                document.getElementById('loading').style.display = 'none';
+                loadingDiv.style.display = 'none';
             }
         }
         
@@ -84,23 +185,27 @@
             
             html += `<button class="submit-btn" onclick="submitQuiz()">📊 Submit & View Score</button>`;
             document.getElementById('quizArea').innerHTML = html;
-            
-            // Reset answers storage
             window.userAnswers = {};
         }
         
         function saveAnswer(questionId, answer) {
             if (!window.userAnswers) window.userAnswers = {};
             window.userAnswers[questionId] = answer;
+            console.log('Saved answer:', questionId, answer);
         }
         
         async function submitQuiz() {
-            if (!currentQuestions.length) return;
+            if (!currentQuestions.length) {
+                alert('No questions! Please generate first.');
+                return;
+            }
             
             const submission = {
                 answers: window.userAnswers || {},
                 questions: currentQuestions
             };
+            
+            console.log('Submitting:', submission);
             
             const response = await fetch('/api/submit', {
                 method: 'POST',
@@ -109,8 +214,8 @@
             });
             
             const result = await response.json();
+            console.log('Result:', result);
             
-            // Display results
             let html = `<div class="result">
                 <h2>🎯 Quiz Results</h2>
                 <p style="font-size: 24px;"><strong>Score: ${result.score}/${result.total} (${result.percentage.toFixed(1)}%)</strong></p>
