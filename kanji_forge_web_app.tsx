@@ -1247,9 +1247,23 @@ function ImportMode({ setKanjiList, existingKanji }) {
   };
 
   const exportCurrentData = () => {
+    const toCSVCell = (value) => {
+      const cell = String(value ?? '');
+      const safeCell = /^[\t\r\n ]*[=+\-@]/.test(cell) ? `'${cell}` : cell;
+      return `"${safeCell.replace(/"/g, '""')}"`;
+    };
+
     let csvStr = "Kanji,Onyomi,Kunyomi,Meaning,JLPT,Example,Mastered\n";
     existingKanji.forEach(k => {
-      csvStr += `"${k.kanji}","${k.onyomi}","${k.kunyomi}","${k.meaning}","${k.jlpt}","${k.example || ''}","${k.mastered ? 'YES' : 'NO'}"\n`;
+      csvStr += [
+        k.kanji,
+        k.onyomi,
+        k.kunyomi,
+        k.meaning,
+        k.jlpt,
+        k.example,
+        k.mastered ? 'YES' : 'NO'
+      ].map(toCSVCell).join(',') + '\n';
     });
 
     const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });

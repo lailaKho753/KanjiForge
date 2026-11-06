@@ -1,6 +1,6 @@
 # ⚔️ KanjiForge
 
-[![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8?style=flat&logo=go)](https://go.dev/)
 [![Ollama](https://img.shields.io/badge/Ollama-0.1+-green?style=flat&logo=ollama)](https://ollama.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -84,7 +84,7 @@ Verify installation:
 
 bash
 go version
-# Should output: go version go1.21.x or higher
+# Should output: go version go1.26.x or higher
 Step 2: Install Ollama
 macOS
 bash
