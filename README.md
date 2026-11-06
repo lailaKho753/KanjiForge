@@ -42,7 +42,9 @@ KanjiForge is a web application that uses local LLMs (via Ollama) to automatical
 - 🎯 **Instant Scoring** - Immediate results with detailed explanations
 - 🔒 **100% Local** - Everything runs on your machine
 - ⚡ **Lightning Fast** - Built with Go for excellent performance
-- 🎨 **Clean Interface** - Simple, distraction-free UI
+- 🎨 **Kanji practice app** - Flashcards, quizzes, writing canvas, and a searchable Kanji library
+- 📥 **CSV import/export** - Manage and back up your personal Kanji collection
+- 🤖 **AI quiz generator** - The original Ollama-powered quiz remains available at `/ai-quiz`
 
 ---
 
@@ -56,6 +58,7 @@ Before you begin, ensure you have:
 | **RAM** | 4GB | 8GB+ |
 | **Storage** | 10GB free | 20GB+ |
 | **Internet** | Only for initial download | Not needed after setup |
+| **Node.js / npm** | Node.js 20+ | Node.js 22+ |
 
 ---
 
@@ -141,6 +144,10 @@ cd KanjiForge
 # Download Go dependencies
 go mod download
 
+# Install and build the React interface
+npm install
+npm run build
+
 # Or if go.mod doesn't exist yet:
 go mod init github.com/yourusername/KanjiForge
 go get github.com/gin-gonic/gin
@@ -162,7 +169,12 @@ text
 Open Your Browser
 Navigate to: http://localhost:8080
 
-You should see the KanjiForge interface.
+The Kanji practice app opens at `http://localhost:8080`. The Ollama-powered
+quiz generator remains available at `http://localhost:8080/ai-quiz`.
+
+For frontend development with Vite, start the Go server in one terminal and
+run `npm run dev` in another. Vite serves the frontend and proxies `/api`
+requests to the Go server.
 
 📖 Using KanjiForge
 Step 1: Prepare Your Kanji Data

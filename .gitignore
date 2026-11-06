@@ -13,6 +13,8 @@ go.work.sum
 
 # Dependency directories
 vendor/
+node_modules/
+static/app/
 
 # IDE
 .idea/
