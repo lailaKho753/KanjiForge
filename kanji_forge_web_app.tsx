@@ -84,7 +84,7 @@ export default function App() {
   };
 
   const resetAllProgress = () => {
-    if (window.confirm("Apakah Anda yakin ingin meriset status hafalan semua Kanji?")) {
+    if (window.confirm("Are you sure you want to reset the mastery status of all Kanji?")) {
       setKanjiList(prev => prev.map(k => ({ ...k, mastered: false, reviewCount: 0 })));
     }
   };
@@ -102,7 +102,7 @@ export default function App() {
               <h1 className="text-xl font-bold tracking-wider bg-gradient-to-r from-rose-400 via-amber-300 to-amber-500 bg-clip-text text-transparent">
                 KANJI FORGE
               </h1>
-              <p className="text-[10px] text-slate-400 tracking-widest uppercase">漢字鍛冶場 • Hafalan & Practice</p>
+              <p className="text-[10px] text-slate-400 tracking-widest uppercase">漢字鍛冶場 • Memorization & Practice</p>
             </div>
           </div>
 
@@ -137,16 +137,16 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        {kanjiList.length === 0 ? (
+        {kanjiList.length === 0 && activeTab !== 'import' ? (
           <div className="text-center py-20 bg-slate-900/50 rounded-2xl border border-slate-800">
             <HelpCircle className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Belum Ada Kanji</h2>
-            <p className="text-slate-400 max-w-md mx-auto mb-6">Import file CSV atau muat ulang data preset untuk mulai menghafal Kanji.</p>
+            <h2 className="text-xl font-semibold mb-2">No Kanji Yet</h2>
+            <p className="text-slate-400 max-w-md mx-auto mb-6">Import a CSV file or reload the preset data to start learning Kanji.</p>
             <button 
               onClick={() => setKanjiList(PRESET_KANJI)} 
               className="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg transition font-medium shadow-lg shadow-rose-900/40"
             >
-              Muat Data Preset (N5/N4)
+              Load Preset Data (N5/N4)
             </button>
           </div>
         ) : (
@@ -195,7 +195,7 @@ export default function App() {
       {/* Footer */}
       <footer className="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-600">
         <p>
-          Kanji Forge • Tempat Menggembleng Hafalan Kanji Jepang •{' '}
+          Kanji Forge • Your Japanese Kanji Practice Forge •{' '}
           <a href="/ai-quiz" className="text-rose-400 hover:text-rose-300">
             AI Quiz Generator
           </a>
@@ -285,9 +285,9 @@ function FlashcardMode({ kanjiList, toggleMastery, onDrawPractice }) {
     return (
       <div className="text-center py-16 bg-slate-900/40 rounded-xl border border-slate-800">
         <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-        <h3 className="text-lg font-semibold text-slate-200">Tidak ada Kanji di filter ini</h3>
-        <p className="text-slate-400 text-sm mt-1">Coba ubah filter kategori di atas.</p>
-        <button onClick={() => setFilter('all')} className="mt-4 text-rose-400 underline text-sm">Lihat Semua Kanji</button>
+        <h3 className="text-lg font-semibold text-slate-200">No Kanji in this filter</h3>
+        <p className="text-slate-400 text-sm mt-1">Try changing the category filter above.</p>
+        <button onClick={() => setFilter('all')} className="mt-4 text-rose-400 underline text-sm">Show All Kanji</button>
       </div>
     );
   }
@@ -301,19 +301,19 @@ function FlashcardMode({ kanjiList, toggleMastery, onDrawPractice }) {
             onClick={() => setFilter('all')}
             className={`px-3 py-1.5 rounded-lg transition ${filter === 'all' ? 'bg-slate-800 text-rose-400 font-semibold' : 'text-slate-400'}`}
           >
-            Semua ({kanjiList.length})
+            All ({kanjiList.length})
           </button>
           <button 
             onClick={() => setFilter('unmastered')}
             className={`px-3 py-1.5 rounded-lg transition ${filter === 'unmastered' ? 'bg-slate-800 text-amber-400 font-semibold' : 'text-slate-400'}`}
           >
-            Belum Hafal ({kanjiList.filter(k=>!k.mastered).length})
+            Learning ({kanjiList.filter(k=>!k.mastered).length})
           </button>
           <button 
             onClick={() => setFilter('mastered')}
             className={`px-3 py-1.5 rounded-lg transition ${filter === 'mastered' ? 'bg-slate-800 text-emerald-400 font-semibold' : 'text-slate-400'}`}
           >
-            Sudah Master ({kanjiList.filter(k=>k.mastered).length})
+            Mastered ({kanjiList.filter(k=>k.mastered).length})
           </button>
         </div>
 
@@ -335,7 +335,7 @@ function FlashcardMode({ kanjiList, toggleMastery, onDrawPractice }) {
               <span className="bg-slate-800/80 px-2.5 py-1 rounded-md text-amber-400 font-bold border border-slate-700/50">
                 {currentKanji.jlpt || 'N/A'}
               </span>
-              <span>Klik atau [Tekan Spasi] untuk Balik</span>
+              <span>Click or [Press Space] to Flip</span>
             </div>
 
             <div className="flex-1 flex flex-col items-center justify-center">
@@ -346,12 +346,12 @@ function FlashcardMode({ kanjiList, toggleMastery, onDrawPractice }) {
 
             <div className="w-full flex justify-between items-center text-slate-400 text-xs">
               <span className="flex items-center gap-1 text-slate-500">
-                <Sparkles className="w-3.5 h-3.5 text-rose-500" /> Tap untuk detail
+                <Sparkles className="w-3.5 h-3.5 text-rose-500" /> Tap for details
               </span>
               <button 
                 onClick={(e) => { e.stopPropagation(); playTTS(currentKanji.kanji); }}
                 className="p-2 bg-slate-800/80 hover:bg-slate-700 rounded-full text-slate-300 transition"
-                title="Dengarkan Pengucapan"
+                title="Play Pronunciation"
               >
                 <Volume2 className="w-4 h-4" />
               </button>
@@ -385,7 +385,7 @@ function FlashcardMode({ kanjiList, toggleMastery, onDrawPractice }) {
                 </div>
                 {currentKanji.example && (
                   <div>
-                    <span className="text-xs uppercase text-slate-500 font-semibold tracking-wider block">Contoh / Catatan</span>
+                    <span className="text-xs uppercase text-slate-500 font-semibold tracking-wider block">Example / Notes</span>
                     <p className="text-slate-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs leading-relaxed">
                       {currentKanji.example}
                     </p>
@@ -400,7 +400,7 @@ function FlashcardMode({ kanjiList, toggleMastery, onDrawPractice }) {
                 className="flex items-center space-x-1.5 text-xs text-amber-400 hover:text-amber-300 bg-amber-950/40 border border-amber-800/60 px-3 py-1.5 rounded-lg transition"
               >
                 <PenTool className="w-3.5 h-3.5" />
-                <span>Latih Coretan</span>
+                <span>Practice Writing</span>
               </button>
 
               <div className="text-xs text-slate-500">
@@ -417,7 +417,7 @@ function FlashcardMode({ kanjiList, toggleMastery, onDrawPractice }) {
         <button
           onClick={prevCard}
           className="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-2xl text-slate-300 transition flex items-center justify-center"
-          title="Sebelumnya (Panah Kiri)"
+          title="Previous (Left Arrow)"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
@@ -433,12 +433,12 @@ function FlashcardMode({ kanjiList, toggleMastery, onDrawPractice }) {
           {currentKanji.mastered ? (
             <>
               <CheckCircle className="w-5 h-5 text-emerald-400" />
-              <span>Sudah Dikuasai (Mastered)</span>
+              <span>Mastered</span>
             </>
           ) : (
             <>
               <Sparkles className="w-5 h-5" />
-              <span>Tandai Sudah Hafal</span>
+              <span>Mark as Mastered</span>
             </>
           )}
         </button>
@@ -446,7 +446,7 @@ function FlashcardMode({ kanjiList, toggleMastery, onDrawPractice }) {
         <button
           onClick={nextCard}
           className="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-2xl text-slate-300 transition flex items-center justify-center"
-          title="Berikutnya (Panah Kanan)"
+          title="Next (Right Arrow)"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
@@ -517,8 +517,8 @@ function QuizMode({ kanjiList, toggleMastery }) {
     return (
       <div className="text-center py-16 bg-slate-900/50 rounded-xl border border-slate-800">
         <HelpCircle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-        <h3 className="text-lg font-semibold">Minimal 4 Kanji Diperlukan</h3>
-        <p className="text-slate-400 text-sm mt-1">Tambahkan lebih banyak kanji di Kanji Vault untuk memulai kuis.</p>
+        <h3 className="text-lg font-semibold">At Least 4 Kanji Required</h3>
+        <p className="text-slate-400 text-sm mt-1">Add more Kanji in the Kanji Vault to start the quiz.</p>
       </div>
     );
   }
@@ -532,13 +532,13 @@ function QuizMode({ kanjiList, toggleMastery }) {
             onClick={() => setQuizType('kanjiToMeaning')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${quizType === 'kanjiToMeaning' ? 'bg-rose-600 text-white' : 'text-slate-400'}`}
           >
-            Kanji ➔ Arti
+            Kanji ➔ Meaning
           </button>
           <button 
             onClick={() => setQuizType('meaningToKanji')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${quizType === 'meaningToKanji' ? 'bg-rose-600 text-white' : 'text-slate-400'}`}
           >
-            Arti ➔ Kanji
+            Meaning ➔ Kanji
           </button>
         </div>
 
@@ -563,7 +563,7 @@ function QuizMode({ kanjiList, toggleMastery }) {
       {currentQuestion && (
         <div className="bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-8 text-center shadow-xl mb-6">
           <span className="text-xs uppercase text-slate-500 tracking-wider font-semibold">
-            {quizType === 'kanjiToMeaning' ? 'Pilih Arti Yang Tepat' : 'Pilih Kanji Yang Sesuai'}
+            {quizType === 'kanjiToMeaning' ? 'Choose the Correct Meaning' : 'Choose the Matching Kanji'}
           </span>
 
           <div className="my-6">
@@ -621,11 +621,11 @@ function QuizMode({ kanjiList, toggleMastery }) {
               <div className="text-left text-xs">
                 {selectedAnswer?.id === currentQuestion.id ? (
                   <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                    <Check className="w-4 h-4" /> Tepat sekali!
+                    <Check className="w-4 h-4" /> Correct!
                   </span>
                 ) : (
                   <span className="text-rose-400 font-semibold flex items-center gap-1">
-                    <XCircle className="w-4 h-4" /> Jawaban benar: {quizType === 'kanjiToMeaning' ? currentQuestion.meaning : currentQuestion.kanji}
+                    <XCircle className="w-4 h-4" /> Correct answer: {quizType === 'kanjiToMeaning' ? currentQuestion.meaning : currentQuestion.kanji}
                   </span>
                 )}
               </div>
@@ -633,7 +633,7 @@ function QuizMode({ kanjiList, toggleMastery }) {
                 onClick={generateQuestion}
                 className="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold transition flex items-center space-x-1 shadow-lg shadow-rose-900/40"
               >
-                <span>Soal Berikutnya</span>
+                <span>Next Question</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -717,7 +717,7 @@ function CanvasMode({ kanjiList, selectedKanji, setSelectedKanji }) {
     <div className="max-w-4xl mx-auto flex flex-col lg:flex-row gap-6 items-start">
       {/* Kanji Selection Sidebar */}
       <div className="w-full lg:w-64 bg-slate-900 border border-slate-800 rounded-2xl p-4">
-        <h3 className="text-xs uppercase text-slate-400 font-semibold mb-3 tracking-wider">Pilih Kanji Latihan</h3>
+        <h3 className="text-xs uppercase text-slate-400 font-semibold mb-3 tracking-wider">Choose a Kanji to Practice</h3>
         <div className="max-h-96 overflow-y-auto space-y-1.5 pr-1">
           {kanjiList.map(k => (
             <button
@@ -758,7 +758,7 @@ function CanvasMode({ kanjiList, selectedKanji, setSelectedKanji }) {
               className={`p-2 rounded-lg border text-xs font-medium flex items-center space-x-1 transition ${
                 showOutline ? 'bg-amber-950/50 border-amber-700 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-500'
               }`}
-              title="Toggle Panutan Bayangan Kanji"
+              title="Toggle Kanji Guide Outline"
             >
               {showOutline ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
               <span className="hidden sm:inline">Outline</span>
@@ -829,13 +829,13 @@ function CanvasMode({ kanjiList, selectedKanji, setSelectedKanji }) {
                 onClick={() => setGridType('none')}
                 className={`px-2.5 py-1 rounded-lg ${gridType === 'none' ? 'bg-slate-800 text-amber-400' : 'text-slate-500'}`}
               >
-                Polos
+                Blank
               </button>
             </div>
 
             {/* Stroke Width Slider */}
             <div className="flex items-center space-x-2 text-xs text-slate-400">
-              <span>Ketebalan:</span>
+              <span>Stroke Width:</span>
               <input 
                 type="range" 
                 min="6" 
@@ -854,7 +854,7 @@ function CanvasMode({ kanjiList, selectedKanji, setSelectedKanji }) {
               className="flex-1 py-2.5 bg-slate-950 hover:bg-slate-800 disabled:opacity-40 text-slate-300 border border-slate-800 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-1"
             >
               <RotateCcw className="w-4 h-4" />
-              <span>Undo Coretan</span>
+              <span>Undo Stroke</span>
             </button>
 
             <button
@@ -862,7 +862,7 @@ function CanvasMode({ kanjiList, selectedKanji, setSelectedKanji }) {
               className="flex-1 py-2.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-1"
             >
               <Trash2 className="w-4 h-4" />
-              <span>Hapus Semua</span>
+              <span>Clear All</span>
             </button>
           </div>
         </div>
@@ -879,6 +879,16 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
   const [jlptFilter, setJlptFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
+  const jlptOptions = useMemo(() => (
+    [...new Set(kanjiList.map(item => item.jlpt?.trim()).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+  ), [kanjiList]);
+
+  useEffect(() => {
+    if (jlptFilter !== 'ALL' && !jlptOptions.includes(jlptFilter)) {
+      setJlptFilter('ALL');
+    }
+  }, [jlptFilter, jlptOptions]);
 
   // New Kanji Form State
   const [formData, setFormData] = useState({ kanji: '', onyomi: '', kunyomi: '', meaning: '', jlpt: 'N5', example: '' });
@@ -891,7 +901,7 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
         item.onyomi.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.kunyomi.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesJlpt = jlptFilter === 'ALL' || item.jlpt === jlptFilter;
+      const matchesJlpt = jlptFilter === 'ALL' || item.jlpt?.trim() === jlptFilter;
       const matchesStatus = 
         statusFilter === 'ALL' || 
         (statusFilter === 'MASTERED' && item.mastered) || 
@@ -917,7 +927,7 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
-            placeholder="Cari berdasarkan Kanji, Arti, Onyomi, Kunyomi..."
+            placeholder="Search by Kanji, meaning, Onyomi, or Kunyomi..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-rose-500"
@@ -931,12 +941,10 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
             onChange={(e) => setJlptFilter(e.target.value)}
             className="bg-slate-950 border border-slate-800 text-xs text-slate-300 rounded-xl px-3 py-2 focus:outline-none"
           >
-            <option value="ALL">Semua JLPT</option>
-            <option value="N5">JLPT N5</option>
-            <option value="N4">JLPT N4</option>
-            <option value="N3">JLPT N3</option>
-            <option value="N2">JLPT N2</option>
-            <option value="N1">JLPT N1</option>
+            <option value="ALL">All JLPT Levels</option>
+            {jlptOptions.map(level => (
+              <option key={level} value={level}>JLPT {level}</option>
+            ))}
           </select>
 
           {/* Status Filter */}
@@ -945,9 +953,9 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
             onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-slate-950 border border-slate-800 text-xs text-slate-300 rounded-xl px-3 py-2 focus:outline-none"
           >
-            <option value="ALL">Semua Status</option>
-            <option value="MASTERED">Sudah Hafal</option>
-            <option value="UNMASTERED">Belum Hafal</option>
+            <option value="ALL">All Statuses</option>
+            <option value="MASTERED">Mastered</option>
+            <option value="UNMASTERED">Not Mastered</option>
           </select>
 
           <button
@@ -955,13 +963,13 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
             className="px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold transition flex items-center space-x-1"
           >
             <Plus className="w-4 h-4" />
-            <span>Tambah Kanji</span>
+            <span>Add Kanji</span>
           </button>
 
           <button
             onClick={resetAllProgress}
             className="p-2 text-slate-400 hover:text-rose-400 bg-slate-950 border border-slate-800 rounded-xl transition"
-            title="Riset Hafalan All"
+            title="Reset All Progress"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -995,7 +1003,7 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
                       ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' 
                       : 'bg-slate-950 text-slate-600 border border-slate-800 hover:text-slate-400'
                   }`}
-                  title={item.mastered ? 'Status: Mastered' : 'Tandai Mastered'}
+                  title={item.mastered ? 'Status: Mastered' : 'Mark as Mastered'}
                 >
                   <CheckCircle className="w-5 h-5" />
                 </button>
@@ -1021,13 +1029,13 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
                 className="text-xs text-rose-400 hover:text-rose-300 flex items-center space-x-1"
               >
                 <PenTool className="w-3.5 h-3.5" />
-                <span>Coret Kanji</span>
+                <span>Practice Writing</span>
               </button>
 
               <button
                 onClick={() => deleteKanji(item.id)}
                 className="text-slate-600 hover:text-rose-400 p-1 transition"
-                title="Hapus dari Vault"
+                title="Remove from Vault"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -1038,7 +1046,7 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
 
       {filteredVault.length === 0 && (
         <div className="text-center py-12 text-slate-500 text-sm">
-          Tidak ada data Kanji yang cocok dengan pencarian Anda.
+          No Kanji match your search.
         </div>
       )}
 
@@ -1047,7 +1055,7 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-slate-100">Tambah Kanji Manual</h3>
+              <h3 className="text-lg font-bold text-slate-100">Add Kanji Manually</h3>
               <button onClick={() => setShowAddModal(false)} className="text-slate-500 hover:text-slate-300">
                 <XCircle className="w-5 h-5" />
               </button>
@@ -1055,26 +1063,26 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
 
             <form onSubmit={handleSubmitNew} className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-400 mb-1">Kanji (Karakter)*</label>
+                <label className="block text-slate-400 mb-1">Kanji (Character)*</label>
                 <input
                   type="text"
                   required
                   maxLength={2}
                   value={formData.kanji}
                   onChange={(e) => setFormData({ ...formData, kanji: e.target.value })}
-                  placeholder="Contoh: 水"
+                  placeholder="Example: 水"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Arti (Meaning)*</label>
+                <label className="block text-slate-400 mb-1">Meaning*</label>
                 <input
                   type="text"
                   required
                   value={formData.meaning}
                   onChange={(e) => setFormData({ ...formData, meaning: e.target.value })}
-                  placeholder="Contoh: Air / Water"
+                  placeholder="Example: Water"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100"
                 />
               </div>
@@ -1104,7 +1112,7 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-slate-400 mb-1">Level JLPT</label>
+                  <label className="block text-slate-400 mb-1">JLPT Level</label>
                   <select
                     value={formData.jlpt}
                     onChange={(e) => setFormData({ ...formData, jlpt: e.target.value })}
@@ -1120,12 +1128,12 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Contoh Kata / Catatan</label>
+                <label className="block text-slate-400 mb-1">Example Word / Notes</label>
                 <textarea
                   rows={2}
                   value={formData.example}
                   onChange={(e) => setFormData({ ...formData, example: e.target.value })}
-                  placeholder="Contoh: 水着 (Mizugi) - Baju renang"
+                  placeholder="Example: 水着 (Mizugi) - Swimsuit"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100"
                 />
               </div>
@@ -1136,13 +1144,13 @@ function VaultMode({ kanjiList, toggleMastery, deleteKanji, addKanji, resetAllPr
                   onClick={() => setShowAddModal(false)}
                   className="px-4 py-2 bg-slate-950 hover:bg-slate-800 text-slate-400 rounded-xl"
                 >
-                  Batal
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-xl"
                 >
-                  Simpan Kanji
+                  Save Kanji
                 </button>
               </div>
             </form>
@@ -1162,11 +1170,49 @@ function ImportMode({ setKanjiList, existingKanji }) {
 
   // Helper parsing CSV
   const parseCSV = (text) => {
-    const lines = text.split(/\r\n|\n/);
-    if (lines.length <= 1) return [];
+    const rows = [];
+    let row = [];
+    let field = '';
+    let inQuotes = false;
+    const content = text.replace(/^\uFEFF/, '');
+
+    for (let i = 0; i < content.length; i++) {
+      const char = content[i];
+
+      if (inQuotes) {
+        if (char === '"' && content[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else if (char === '"') {
+          inQuotes = false;
+        } else {
+          field += char;
+        }
+      } else if (char === '"' && field.length === 0) {
+        inQuotes = true;
+      } else if (char === ',') {
+        row.push(field);
+        field = '';
+      } else if (char === '\n' || char === '\r') {
+        row.push(field);
+        rows.push(row);
+        row = [];
+        field = '';
+        if (char === '\r' && content[i + 1] === '\n') i++;
+      } else {
+        field += char;
+      }
+    }
+
+    if (inQuotes) throw new Error('CSV contains an unmatched quotation mark.');
+    if (field.length > 0 || row.length > 0) {
+      row.push(field);
+      rows.push(row);
+    }
 
     // Header detection
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    if (rows.length <= 1) return [];
+    const headers = rows[0].map(h => h.trim().toLowerCase());
     
     // Column Index Mapper
     const findIndex = (names) => headers.findIndex(h => names.some(n => h.includes(n)));
@@ -1180,15 +1226,13 @@ function ImportMode({ setKanjiList, existingKanji }) {
 
     const results = [];
 
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
+    for (let i = 1; i < rows.length; i++) {
+      const values = rows[i];
+      if (values.every(value => !value.trim())) continue;
 
-      // Handle quoted commas correctly
-      const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
       const cleanVal = (idx) => {
         if (idx === -1 || !values[idx]) return '';
-        return values[idx].replace(/^"|"$/g, '').trim();
+        return values[idx].trim();
       };
 
       const kanjiChar = cleanVal(kanjiIdx !== -1 ? kanjiIdx : 0);
@@ -1199,7 +1243,7 @@ function ImportMode({ setKanjiList, existingKanji }) {
         kanji: kanjiChar,
         onyomi: cleanVal(onyomiIdx !== -1 ? onyomiIdx : 1),
         kunyomi: cleanVal(kunyomiIdx !== -1 ? kunyomiIdx : 2),
-        meaning: cleanVal(meaningIdx !== -1 ? meaningIdx : 3) || 'Tanpa Arti',
+        meaning: cleanVal(meaningIdx !== -1 ? meaningIdx : 3) || 'No meaning',
         jlpt: cleanVal(jlptIdx !== -1 ? jlptIdx : 4) || 'N5',
         example: cleanVal(exampleIdx !== -1 ? exampleIdx : 5),
         mastered: false,
@@ -1219,12 +1263,12 @@ function ImportMode({ setKanjiList, existingKanji }) {
         const parsed = parseCSV(content);
         if (parsed.length > 0) {
           setKanjiList(prev => [...parsed, ...prev]);
-          setImportStatus({ type: 'success', message: `Berhasil mengimpor ${parsed.length} Kanji baru!` });
+          setImportStatus({ type: 'success', message: `Successfully imported ${parsed.length} new Kanji!` });
         } else {
-          setImportStatus({ type: 'error', message: 'Gagal membaca CSV. Pastikan format kolom sesuai.' });
+          setImportStatus({ type: 'error', message: 'Could not read the CSV. Make sure the columns are formatted correctly.' });
         }
       } catch (err) {
-        setImportStatus({ type: 'error', message: 'Terjadi kesalahan saat memproses file.' });
+        setImportStatus({ type: 'error', message: 'An error occurred while processing the file.' });
       }
     };
     reader.readAsText(file);
@@ -1280,9 +1324,9 @@ function ImportMode({ setKanjiList, existingKanji }) {
     <div className="max-w-3xl mx-auto space-y-8">
       {/* Upload Drag & Drop Area */}
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center space-y-4 shadow-xl">
-        <h2 className="text-xl font-bold text-slate-100">Import Data Kanji via File CSV</h2>
+        <h2 className="text-xl font-bold text-slate-100">Import Kanji Data from a CSV File</h2>
         <p className="text-xs text-slate-400 max-w-md mx-auto">
-          Tambahkan koleksi Kanji buatan Anda secara langsung dari spreadsheet Microsoft Excel / Google Sheets format .csv.
+          Add your Kanji collection directly from a Microsoft Excel or Google Sheets spreadsheet in .csv format.
         </p>
 
         <div
@@ -1300,8 +1344,8 @@ function ImportMode({ setKanjiList, existingKanji }) {
           }`}
         >
           <Upload className="w-12 h-12 text-rose-500 mb-3 animate-bounce" />
-          <p className="text-sm font-semibold text-slate-200">Tarik & Lepas File CSV di Sini</p>
-          <p className="text-xs text-slate-500 mt-1">atau klik tombol di bawah untuk memilih file</p>
+          <p className="text-sm font-semibold text-slate-200">Drag & Drop a CSV File Here</p>
+          <p className="text-xs text-slate-500 mt-1">or click the button below to choose a file</p>
           
           <input
             type="file"
@@ -1314,7 +1358,7 @@ function ImportMode({ setKanjiList, existingKanji }) {
             htmlFor="csvFileInput"
             className="mt-4 px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-xl text-xs transition cursor-pointer shadow-lg shadow-rose-900/30"
           >
-            Pilih File CSV
+            Choose CSV File
           </label>
         </div>
 
@@ -1334,10 +1378,10 @@ function ImportMode({ setKanjiList, existingKanji }) {
           <div>
             <h3 className="font-bold text-slate-200 text-sm mb-1 flex items-center gap-2">
               <Download className="w-4 h-4 text-amber-400" />
-              <span>Download Contoh Template</span>
+              <span>Download Sample Template</span>
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Gunakan struktur kolom standar ini agar data Kanji Anda terpetakan sempurna (Kanji, Onyomi, Kunyomi, Meaning, JLPT, Example).
+              Use this standard column structure to map your Kanji data correctly (Kanji, Onyomi, Kunyomi, Meaning, JLPT, Example).
             </p>
           </div>
           <button
@@ -1355,7 +1399,7 @@ function ImportMode({ setKanjiList, existingKanji }) {
               <span>Export Backup Data</span>
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Unduh seluruh daftar Kanji yang tersimpan saat ini ({existingKanji.length} item) ke dalam format CSV beserta status hafalannya.
+              Download all currently saved Kanji ({existingKanji.length} items) as a CSV, including their mastery status.
             </p>
           </div>
           <button
